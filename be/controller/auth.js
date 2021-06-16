@@ -2,6 +2,19 @@ const Users = require("../models/Users")
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Joi = require('@hapi/joi');
+exports.Auth = async(req,res)=>{
+    try{
+        id = req.user.user_id
+        const user = await Users.findOne({_id:id})
+        console.log(user)
+        return res.status(200).send({
+             massage:'Auth Success',
+             data:user   
+		})
+    }catch(error){
+        res.status(500).send('Server Error')
+    }
+}
 exports.login=async(req,res)=>{
     try{
         const schema = Joi.object({
@@ -48,7 +61,10 @@ exports.register=async(req,res)=>{
         const schema = Joi.object({
 			email: Joi.string().email().min(6).required(),
             name: Joi.string(),
-			password: Joi.string().min(6).required()
+			password: Joi.string().min(6).required(),
+            gendre: Joi.string(),
+            addres:Joi.string(),
+            phone:Joi.string()
 		});
 		const { error } = schema.validate(req.body);
 		if (error)
@@ -66,7 +82,7 @@ exports.register=async(req,res)=>{
             const user = await Users.create({
                 ...req.body,
                 password:hashedPass,
-                role: "1",
+                role: "2"
             })
             const token = jwt.sign({user_id:user.id},process.env.SECRET_KEY)
             return res.status(200).send({
